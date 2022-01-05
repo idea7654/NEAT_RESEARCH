@@ -675,7 +675,7 @@ bool Species::reproduce(int generation, Population *pop, std::vector<Species*> &
 					//randspeciesnum=randint(0,(pop->species).size()-1);
 
 					//Choose a random species tending towards better species
-					randmult = (double)randbtn(0, 1) / 4;
+					randmult = isEven() / 4;
 					if (randmult > 1.0) randmult = 1.0;
 					//This tends to select better species
 					randspeciesnum = (int)floor((randmult*(sorted_species.size() - 1.0)) + 0.5);

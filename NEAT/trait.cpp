@@ -52,8 +52,8 @@ NEAT::Trait::Trait(Trait * t1, Trait * t2)
 void NEAT::Trait::mutate()
 {
 	for (int count = 0; count < NEAT::num_trait_params; count++) {
-		if (randbtn(0.0, 1.0) > 0.5) { //trait_param_mut_prob = 0.5
-			params[count] += (randbtn(0, 1)*randbtn(0.0, 1.0))*1.0; //trait_mutation_power = 1.0
+		if (randbtn(0.0, 1.0) > NEAT::trait_param_mut_prob) { //trait_param_mut_prob = 0.5
+			params[count] += (isEven()*randbtn(0.0, 1.0))*NEAT::trait_mutation_power; //trait_mutation_power = 1.0
 			if (params[count] < 0) params[count] = 0;
 			if (params[count] > 1.0) params[count] = 1.0;
 		}

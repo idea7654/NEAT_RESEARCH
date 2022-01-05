@@ -26,3 +26,8 @@ int pole1_epoch(Population *pop, int generation, char *filename);
 int go_cart(Network *net, int max_steps, int thresh); //Run input
 //Move the cart and pole
 void cart_pole(int action, float *x, float *x_dot, float *theta, float *theta_dot);
+
+Population *flappy_bird(int gens, int &posY);
+int measure_fitness_flappybird(Population *pop, int generation, char *filename);
+bool flappybird_evaluate(Organism *org);
+int try_flappybird(Network *net, int max_steps, int thresh); //Run input

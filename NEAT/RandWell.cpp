@@ -42,6 +42,12 @@ int randbtn(int T, int minValue, int maxValue)
 	return (int)(wellrand * ((double)(maxValue - minValue) + 0.99)) + minValue;
 }
 
+int isEven()
+{
+	int randomValue = randbtn(0, 1);
+	return randomValue == 1 ? 1 : -1;
+}
+
 
 double randbtn(double min, double max)
 {

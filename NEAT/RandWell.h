@@ -38,6 +38,7 @@ double RandWELL(int N);
 int randbtn(int minValue, int maxValue);
 
 int randbtn(int T, int minValue, int maxValue);
+int isEven();
 
 double randbtn(double min, double max);
 

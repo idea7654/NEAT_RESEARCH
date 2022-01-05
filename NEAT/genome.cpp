@@ -321,7 +321,7 @@ Genome::Genome(int new_id, int i, int o, int n, int nmax, bool r, double linkpro
 					out_node = (*node_iter);
 
 					//Create the gene
-					new_weight = randbtn(0, 1)*randbtn(0.0, 1.0);
+					new_weight = isEven()*randbtn(0.0, 1.0);
 					newgene = new Gene(newtrait, new_weight, in_node, out_node, false, count, new_weight);
 
 					//Add the gene to the genome
@@ -345,7 +345,7 @@ Genome::Genome(int new_id, int i, int o, int n, int nmax, bool r, double linkpro
 					out_node = (*node_iter);
 
 					//Create the gene
-					new_weight = randbtn(0, 1)*randbtn(0.0, 1.0);
+					new_weight = isEven()*randbtn(0.0, 1.0);
 					newgene = new Gene(newtrait, new_weight, in_node, out_node, true, count, new_weight);
 
 					//Add the gene to the genome
@@ -1254,7 +1254,7 @@ void Genome::mutate_link_weights(double power, double rate, mutator mut_type) {
 			//randnum=gaussrand()*powermod;
 			//randnum=gaussrand();
 
-			randnum = randbtn(0, 1)*randbtn(0.0, 1.0)*power*powermod;
+			randnum = isEven()*randbtn(0.0, 1.0)*power*powermod;
 			//std::cout << "RANDOM: " << randnum << " " << randposneg() << " " << randfloat() << " " << power << " " << powermod << std::endl;
 			if (mut_type == GAUSSIAN) {
 				randchoice = randbtn(0.0, 1.0);
@@ -1773,7 +1773,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs, double &curinnov,
 				//Choose the new weight
 				//newweight=(gaussrand())/1.5;  //Could use a gaussian
 				//newweight = randposneg()*randfloat()*1.0; //used to be 10.0
-				newweight = randbtn(0, 1) * randbtn(0.0, 1.0) * 1.0;
+				newweight = isEven() * randbtn(0.0, 1.0) * 1.0;
 
 				//Create the new gene
 				newgene = new Gene(((thetrait[traitnum])), newweight, nodep1, nodep2, recurflag, curinnov, newweight);
@@ -1912,7 +1912,7 @@ void Genome::mutate_add_sensor(std::vector<Innovation*> &innovs, double &curinno
 					//Choose the new weight
 					//newweight=(gaussrand())/1.5;  //Could use a gaussian
 					//newweight = randposneg()*randfloat()*3.0; //used to be 10.0
-					newweight = randbtn(0, 1) * randbtn(0.0, 1.0) * 3.0;
+					newweight = isEven() * randbtn(0.0, 1.0) * 3.0;
 
 					//Create the new gene
 					newgene = new Gene(((thetrait[traitnum])),

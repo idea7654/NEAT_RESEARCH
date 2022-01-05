@@ -2,6 +2,8 @@
 #include "experiments.h"
 #include "RandWell.h"
 
+using namespace std;
+
 Population *pole1_test(int gens) {
 	Population *pop = 0;
 	Genome *start_genome;
@@ -76,7 +78,7 @@ Population *pole1_test(int gens) {
 	totalevals = 0;
 	samples = 0;
 	for (expcount = 0; expcount < NEAT::num_runs; expcount++) {
-		cout << runs[expcount] << endl;
+		//cout << runs[expcount] << endl;
 		if (runs[expcount] > 0)
 		{
 			totalevals += runs[expcount];
@@ -98,7 +100,6 @@ int pole1_epoch(Population *pop, int generation, char *filename) {
 	//strncpy( cfilename, filename.c_str(), 100 );
 
 	//ofstream cfilename(filename.c_str());
-
 	bool win = false;
 	int winnernum;
 
@@ -124,8 +125,7 @@ int pole1_epoch(Population *pop, int generation, char *filename) {
 	//  pop->snapshot();
 
 	//Only print to file every print_every generations
-	if (win ||
-		((generation % (NEAT::print_every)) == 0))
+	if (win || ((generation % (NEAT::print_every)) == 0))
 		pop->print_to_file_by_species(filename);
 
 	if (win) {
@@ -206,10 +206,10 @@ int go_cart(Network *net, int max_steps, int thresh)
 
 	if (random_start) {
 		/*set up random start state*/
-		x = (randbtn(0, 2147483648) % 4800) / 1000.0 - 2.4;
-		x_dot = (randbtn(0, 2147483648) % 2000) / 1000.0 - 1;
-		theta = (randbtn(0, 2147483648) % 400) / 1000.0 - .2;
-		theta_dot = (randbtn(0, 2147483648) % 3000) / 1000.0 - 1.5;
+		x = (randbtn(0, 2147483647) % 4800) / 1000.0 - 2.4;
+		x_dot = (randbtn(0, 2147483647) % 2000) / 1000.0 - 1;
+		theta = (randbtn(0, 2147483647) % 400) / 1000.0 - 0.2;
+		theta_dot = (randbtn(0, 2147483647) % 3000) / 1000.0 - 1.5;
 	}
 	else
 		x = x_dot = theta = theta_dot = 0.0;
@@ -244,13 +244,11 @@ int go_cart(Network *net, int max_steps, int thresh)
 
 		/*--- Apply action to the simulated cart-pole ---*/
 		cart_pole(y, &x, &x_dot, &theta, &theta_dot);
-
 		/*--- Check for failure.  If so, return steps ---*/
-		if (x < -2.4 || x > 2.4 || theta < -twelve_degrees ||
-			theta > twelve_degrees)
+		if (x < -2.4 || x > 2.4 || theta < -twelve_degrees || theta > twelve_degrees)
 			return steps;
 	}
-
+	
 	return steps;
 }
 
@@ -297,3 +295,252 @@ void cart_pole(int action, float *x, float *x_dot, float *theta, float *theta_do
 	*theta += TAU * *theta_dot;
 	*theta_dot += TAU * thetaacc;
 }
+
+Population * flappy_bird(int gens, int &posY)
+{
+	Population *pop = 0;
+	Genome *start_genome;
+	char curword[20];
+	int id;
+
+	ostringstream *fnamebuf;
+	int gen;
+
+	int status;
+	int runs[1];
+	int totalevals;
+	int samples;  //For averaging
+
+	memset(runs, 0, NEAT::num_runs * sizeof(int));
+
+	ifstream iFile("flappybird", ios::in);
+
+	cout << "START Flappy Bird Evolution!" << endl;
+
+	cout << "Reading in the start genome" << endl;
+	//Read in the start Genome
+	iFile >> curword;
+	iFile >> id;
+	cout << "Reading in Genome id " << id << endl;
+	start_genome = new Genome(id, iFile);
+	iFile.close();
+
+	//Run multiple experiments
+
+	cout << "Start Genome: " << start_genome << endl;
+
+		//Spawn the Population
+	cout << "Spawning Population off Genome" << endl;
+
+	pop = new Population(start_genome, NEAT::pop_size);
+
+	cout << "Verifying Spawned Pop" << endl;
+	pop->verify();
+
+	for (gen = 1; gen <= gens; gen++) {
+		cout << "Generation " << gen << endl;
+
+		fnamebuf = new ostringstream();
+		(*fnamebuf) << "gen_" << gen << ends;  //needs end marker
+
+
+		char temp[50];
+		sprintf(temp, "gen_%d", gen);
+
+		//status = pole1_epoch(pop, gen, temp);
+		//status=(pole1_epoch(pop,gen,fnamebuf->str()));
+		status = measure_fitness_flappybird(pop, gen, temp);
+
+		if (status) {
+			runs[0] = status;
+			gen = gens + 1;
+		}
+		fnamebuf->clear();
+		delete fnamebuf;
+
+		if (0 < NEAT::num_runs - 1) delete pop;
+	}
+
+	totalevals = 0;
+	samples = 0;
+	//cout << runs[expcount] << endl;
+	if (runs[0] > 0)
+	{
+		totalevals += runs[0];
+		samples++;
+	}
+
+	cout << "Failures: " << (NEAT::num_runs - samples) << " out of " << NEAT::num_runs << " runs" << endl;
+	cout << "Average evals: " << (samples > 0 ? (double)totalevals / samples : 0) << endl;
+
+
+	return pop;
+}
+
+int measure_fitness_flappybird(Population * pop, int generation, char * filename)
+{
+	vector<Organism*>::iterator curorg;
+	vector<Species*>::iterator curspecies;
+
+	//ofstream cfilename(filename.c_str());
+	bool win = false;
+	int winnernum;
+
+	//Evaluate each organism on a test
+	for (curorg = (pop->organisms).begin(); curorg != (pop->organisms).end(); ++curorg) {
+		if (flappybird_evaluate(*curorg)) win = true;
+	}
+
+	//Average and max their fitnesses for dumping to file and snapshot
+	for (curspecies = (pop->species).begin(); curspecies != (pop->species).end(); ++curspecies) {
+		//This experiment control routine issues commands to collect ave
+		//and max fitness, as opposed to having the snapshot do it, 
+		//because this allows flexibility in terms of what time
+		//to observe fitnesses at
+
+		(*curspecies)->compute_average_fitness();
+		(*curspecies)->compute_max_fitness();
+	}
+
+	//Only print to file every print_every generations
+	if (win || ((generation % (NEAT::print_every)) == 0))
+		pop->print_to_file_by_species(filename);
+
+	if (win) {
+		for (curorg = (pop->organisms).begin(); curorg != (pop->organisms).end(); ++curorg) {
+			if ((*curorg)->winner) {
+				winnernum = ((*curorg)->gnome)->genome_id;
+				cout << "WINNER IS #" << ((*curorg)->gnome)->genome_id << endl;
+			}
+		}
+	}
+
+	//Create the next generation
+	pop->epoch(generation);
+
+	if (win) return ((generation - 1)*NEAT::pop_size + winnernum);
+	else return 0;
+}
+
+bool flappybird_evaluate(Organism * org)
+{
+	Network *net;
+
+	int numnodes;  /* Used to figure out how many nodes
+			  should be visited during activation */
+	int thresh;  /* How many visits will be allowed before giving up
+			(for loop detection) */
+
+			//  int MAX_STEPS=120000;
+	int MAX_STEPS = 100000;
+
+	net = org->net;
+	numnodes = ((org->gnome)->nodes).size();
+	thresh = numnodes * 2;  //Max number of visits allowed per activation
+
+	//Try to balance a pole now
+	org->fitness = try_flappybird(net, MAX_STEPS, thresh);
+
+	//Decide if its a winner
+	if (org->fitness >= MAX_STEPS) {
+		org->winner = true;
+		return true;
+	}
+	else {
+		org->winner = false;
+		return false;
+	}
+} 
+
+int try_flappybird(Network * net, int max_steps, int thresh)
+{
+	//Measure Fitness
+	
+	return 0;
+}
+
+//Population *flappy_bird(int gens)
+//{
+//	Population *pop = 0;
+//	Genome *start_genome;
+//	char curword[20];
+//	int id;
+//
+//	ostringstream *fnamebuf;
+//	int gen;
+//
+//	int expcount;
+//	int status;
+//	int runs[1];
+//	int totalevals;
+//	int samples;  //For averaging
+//
+//	memset(runs, 0, NEAT::num_runs * sizeof(int));
+//
+//	ifstream iFile("pole1startgenes", ios::in);
+//
+//	cout << "START SINGLE POLE BALANCING EVOLUTION" << endl;
+//
+//	cout << "Reading in the start genome" << endl;
+//	//Read in the start Genome
+//	iFile >> curword;
+//	iFile >> id;
+//	cout << "Reading in Genome id " << id << endl;
+//	start_genome = new Genome(id, iFile);
+//	iFile.close();
+//
+//	//Run multiple experiments
+//	for (expcount = 0; expcount < NEAT::num_runs; expcount++) {
+//
+//		cout << "EXPERIMENT #" << expcount << endl;
+//
+//		cout << "Start Genome: " << start_genome << endl;
+//
+//		//Spawn the Population
+//		cout << "Spawning Population off Genome" << endl;
+//
+//		pop = new Population(start_genome, NEAT::pop_size);
+//
+//		cout << "Verifying Spawned Pop" << endl;
+//		pop->verify();
+//
+//		for (gen = 1; gen <= gens; gen++) {
+//			cout << "Generation " << gen << endl;
+//
+//			fnamebuf = new ostringstream();
+//			(*fnamebuf) << "gen_" << gen << ends;  //needs end marker
+//
+//			char temp[50];
+//			sprintf(temp, "gen_%d", gen);
+//
+//			//status = pole1_epoch(pop, gen, temp);
+//			//status=(pole1_epoch(pop,gen,fnamebuf->str()));
+//			//status = flappy_epoch(pop, gen, temp);
+//
+//			if (status) {
+//				runs[expcount] = status;
+//				gen = gens + 1;
+//			}
+//			fnamebuf->clear();
+//			delete fnamebuf;
+//		}
+//
+//		if (expcount < NEAT::num_runs - 1) delete pop;
+//	}
+//
+//	totalevals = 0;
+//	samples = 0;
+//	for (expcount = 0; expcount < NEAT::num_runs; expcount++) {
+//		//cout << runs[expcount] << endl;
+//		if (runs[expcount] > 0)
+//		{
+//			totalevals += runs[expcount];
+//			samples++;
+//		}
+//	}
+//
+//	cout << "Failures: " << (NEAT::num_runs - samples) << " out of " << NEAT::num_runs << " runs" << endl;
+//	cout << "Average evals: " << (samples > 0 ? (double)totalevals / samples : 0) << endl;
+//
+//	return pop;
+//}
