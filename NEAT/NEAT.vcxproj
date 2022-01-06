@@ -183,6 +183,7 @@
     <ClInclude Include="RandWell.h" />
     <ClInclude Include="species.h" />
     <ClInclude Include="trait.h" />
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

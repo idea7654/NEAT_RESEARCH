@@ -1,6 +1,9 @@
+#pragma once
 #pragma warning(disable : 4996)
 #include "experiments.h"
 #include "RandWell.h"
+#include <thread>
+#include <mutex>
 
 using namespace std;
 
@@ -157,6 +160,7 @@ bool pole1_evaluate(Organism *org) {
 	int MAX_STEPS = 100000;
 
 	net = org->net;
+
 	numnodes = ((org->gnome)->nodes).size();
 	thresh = numnodes * 2;  //Max number of visits allowed per activation
 
@@ -296,20 +300,22 @@ void cart_pole(int action, float *x, float *x_dot, float *theta, float *theta_do
 	*theta_dot += TAU * thetaacc;
 }
 
-Population * flappy_bird(int gens, int &posY)
+Population * flappy_bird(int gens, Bird *bird)
 {
 	Population *pop = 0;
 	Genome *start_genome;
 	char curword[20];
-	int id;
+	int id = 0;
+
+	newBird = bird;
 
 	ostringstream *fnamebuf;
-	int gen;
+	int gen = 0;
 
-	int status;
+	int status = 0;
 	int runs[1];
-	int totalevals;
-	int samples;  //For averaging
+	int totalevals = 0;
+	int samples = 0;  //For averaging
 
 	memset(runs, 0, NEAT::num_runs * sizeof(int));
 
@@ -358,7 +364,7 @@ Population * flappy_bird(int gens, int &posY)
 		fnamebuf->clear();
 		delete fnamebuf;
 
-		if (0 < NEAT::num_runs - 1) delete pop;
+		//if (0 < NEAT::num_runs - 1) delete pop;
 	}
 
 	totalevals = 0;
@@ -383,13 +389,27 @@ int measure_fitness_flappybird(Population * pop, int generation, char * filename
 	vector<Species*>::iterator curspecies;
 
 	//ofstream cfilename(filename.c_str());
+
 	bool win = false;
-	int winnernum;
+	int winnernum = 0;
 
 	//Evaluate each organism on a test
-	for (curorg = (pop->organisms).begin(); curorg != (pop->organisms).end(); ++curorg) {
+	/*for (curorg = (pop->organisms).begin(); curorg != (pop->organisms).end(); ++curorg) {
 		if (flappybird_evaluate(*curorg)) win = true;
+	}*/
+	//vector<thread> thread_pool;
+	for (auto &i : pop->organisms)
+	{
+		newBird->posY = 30;
+		newBird->gameOver = false;
+		newBird->score = 0;
+		if (flappybird_evaluate(i))
+			win = true;
+		//thread_pool.emplace_back(thread(&flappybird_evaluate, i));
 	}
+
+	//for (auto &thread : thread_pool)
+	//	thread.join();
 
 	//Average and max their fitnesses for dumping to file and snapshot
 	for (curspecies = (pop->species).begin(); curspecies != (pop->species).end(); ++curspecies) {
@@ -414,9 +434,17 @@ int measure_fitness_flappybird(Population * pop, int generation, char * filename
 			}
 		}
 	}
-
 	//Create the next generation
 	pop->epoch(generation);
+
+	/*for (auto &i : birds)
+	{
+		i->posY = 30;
+		i->gameOver = false;
+		i->score = 0;
+	}
+	Initialize();*/
+	
 
 	if (win) return ((generation - 1)*NEAT::pop_size + winnernum);
 	else return 0;
@@ -434,12 +462,23 @@ bool flappybird_evaluate(Organism * org)
 			//  int MAX_STEPS=120000;
 	int MAX_STEPS = 100000;
 
-	net = org->net;
+	if (org)
+		net = org->net;
+	else
+		return false;
+	
 	numnodes = ((org->gnome)->nodes).size();
 	thresh = numnodes * 2;  //Max number of visits allowed per activation
 
 	//Try to balance a pole now
-	org->fitness = try_flappybird(net, MAX_STEPS, thresh);
+	
+	if (net->net_id > 0)
+	{
+		org->fitness = try_flappybird(net, MAX_STEPS, thresh);
+		cout << org->fitness << endl;
+	}
+	else
+		return false;
 
 	//Decide if its a winner
 	if (org->fitness >= MAX_STEPS) {
@@ -455,8 +494,81 @@ bool flappybird_evaluate(Organism * org)
 int try_flappybird(Network * net, int max_steps, int thresh)
 {
 	//Measure Fitness
-	
-	return 0;
+	float steps = 0;
+
+	double in[4];
+
+	double out_Up;
+	double out_Down;
+
+	vector<NNode*>::iterator out_iter;
+	float fitness = 0;
+	while (!newBird->gameOver)
+	{
+		in[0] = 20.0;
+		//in[1] = birds[net->net_id - 1]->posY; //Y벡터
+		//in[2] = birds[net->net_id - 1]->angle_up; //위와의 각도
+		//in[3] = birds[net->net_id - 1]->angle_down; //아래와의 각도
+		in[1] = newBird->posY;
+		in[2] = newBird->angle_up;
+		in[3] = newBird->angle_down;
+		net->load_sensors(in);
+
+		int closeNum = 0;
+		if (newBird->posY < posBarY[0])
+			closeNum = posBarY[0];
+		else if (newBird->posY > posBarY[0] + 12)
+			closeNum = posBarY[0] + 12;
+		else
+		{
+			if (posBarY[0] + 12 - newBird->posY >= 6)
+				closeNum = posBarY[0] + 12;
+			else
+				closeNum = posBarY[0];
+		}
+		int previousValue = closeNum - newBird->posY;
+
+		if (!(net->activate())) return 1;
+
+		/*-- decide which way to push via which output unit is greater --*/
+		out_iter = net->outputs.begin();
+		out_Up = (*out_iter)->activation;
+		++out_iter;
+		out_Down = (*out_iter)->activation;
+
+		/*if (out_Up > out_Down)
+			birds[net->net_id - 1]->posY++;
+		else if (out_Up < out_Down)
+			birds[net->net_id - 1]->posY--;
+		else
+			birds[net->net_id - 1]->posY = birds[net->net_id - 1]->posY;
+
+		birds[net->net_id - 1]->CalculateAngle();
+		const int upAngle = (int)(birds[net->net_id - 1]->angle_up * 180 / 3.14159265358);
+		const int downAngle = (int)(birds[net->net_id - 1]->angle_down * 180 / 3.14159265358);*/
+		if (out_Up > out_Down)
+		{
+			newBird->posY++;
+			steps++;
+		}
+		else if (out_Up < out_Down)
+		{
+			newBird->posY--;
+			steps++;
+		}
+		else
+			newBird->posY = newBird->posY;
+
+		newBird->CalculateAngle();
+		//const int upAngle = (int)(newBird->angle_up * 18 / 3.14159265358);
+		//const int downAngle = (int)(newBird->angle_down * 18 / 3.14159265358);
+		//fitness += (newBird->angle_up + newBird->angle_down) / 1000000 * steps / 100000;
+		//fitness += ((closeNum - newBird->posY) - previousValue) / 1;
+		//steps += 0.00001;
+	}
+	//return (int)steps;
+	return steps * (newBird->score + 1) * (newBird->score + 1) / 10000;
+	//return birds[net->net_id - 1]->score * birds[net->net_id - 1]->score;
 }
 
 //Population *flappy_bird(int gens)

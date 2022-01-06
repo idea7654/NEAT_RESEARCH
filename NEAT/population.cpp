@@ -402,33 +402,33 @@ bool Population::epoch(int generation) {
 
 	double overall_average;  //The average modified fitness among ALL organisms
 
-	int orgcount;
+	int orgcount = 0;
 
 	//The fractional parts of expected offspring that can be 
 	//Used only when they accumulate above 1 for the purposes of counting
 	//Offspring
 	double skim; 
-	int total_expected;  //precision checking
+	int total_expected = 0;  //precision checking
 	int total_organisms=organisms.size();
-	int max_expected;
+	int max_expected = 0;
 	Species *best_species = nullptr;
-	int final_expected;
+	int final_expected = 0;
 
-	int pause;
+	int pause = 0;
 
 	//Rights to make babies can be stolen from inferior species
 	//and given to their superiors, in order to concentrate exploration on
 	//the best species
 	int NUM_STOLEN=NEAT::babies_stolen; //Number of babies to steal
-	int one_fifth_stolen;
-	int one_tenth_stolen;
+	int one_fifth_stolen = 0;
+	int one_tenth_stolen = 0;
 
 	std::vector<Species*> sorted_species;  //Species sorted by max fit org in Species
-	int stolen_babies; //Babies taken from the bad species and given to the champs
+	int stolen_babies = 0; //Babies taken from the bad species and given to the champs
 
-	int half_pop;
+	int half_pop = 0;
 
-	int best_species_num;  //Used in debugging to see why (if) best species dies
+	int best_species_num = 0;  //Used in debugging to see why (if) best species dies
 	bool best_ok;
 
 	//We can try to keep the number of species constant at this number
@@ -520,15 +520,25 @@ bool Population::epoch(int generation) {
 		//Find the Species expecting the most
 		max_expected=0;
 		final_expected=0;
-		for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
+		/*for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
 			if ((*curspecies)->expected_offspring>=max_expected) {
 				max_expected=(*curspecies)->expected_offspring;
 				best_species=(*curspecies);
 			}
 			final_expected+=(*curspecies)->expected_offspring;
+		}*/
+		for (auto &i : species)
+		{
+			if (i->expected_offspring >= max_expected)
+			{
+				max_expected = i->expected_offspring;
+				best_species = i;
+			}
+			final_expected += i->expected_offspring;
 		}
 		//Give the extra offspring to the best species
-		++(best_species->expected_offspring);
+		if(best_species)
+			++(best_species->expected_offspring);
 		final_expected++;
 
 		//If we still arent at total, there is a problem
@@ -543,7 +553,8 @@ bool Population::epoch(int generation) {
 			for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
 				(*curspecies)->expected_offspring=0;
 			}
-			best_species->expected_offspring=total_organisms;
+			if(best_species)
+				best_species->expected_offspring=total_organisms;
 		}
 	}
 

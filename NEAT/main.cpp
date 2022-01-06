@@ -5,18 +5,18 @@
 #include <gl/gl.h>
 #include <gl/glut.h>
 #include <algorithm>
+#include <future>
+#include <thread>
 #include "neat.h"
 #include "RandWell.h"
 #include "population.h"
 #include "experiments.h"
-#include "game.h"
 
 #define COLUMNS 60
 #define ROWS 60
 
-#define FPS 10
+#define FPS 180
 
-vector<Bird*> birds;
 Bird *newbird = nullptr;
 
 vector<int> posY(NEAT::pop_size);
@@ -32,6 +32,8 @@ void init()
 	//initGrid(COLUMNS, ROWS);
 	replace(posY.begin(), posY.end(), 0, 30);
 	newbird->initGrid(COLUMNS, ROWS, posY[0]);
+	//for (auto &i : birds)
+	//	i->initGrid(COLUMNS, ROWS, posY[0]);
 }
 
 using namespace std;
@@ -39,12 +41,35 @@ using namespace std;
 int main(int argc, char **argv)
 {
 	Init_WELL_RAND();
+	//for (int i = 0; i < NEAT::pop_size; i++)
+	//{
+	//	newbird = new Bird();
+	//	birds.push_back(newbird);
+	//}
 	newbird = new Bird();
-	//NEAT::Population *p = 0;
-	//p = pole1_test(100);
-	//p = flappy_bird(10, posY[0]);
 
-	glutInit(&argc, argv);
+	NEAT::Population *p = 0;
+
+	future<void> future = async(launch::async, []() {
+		flappy_bird(100, newbird);
+		});
+
+	replace(posY.begin(), posY.end(), 0, 30);
+	newbird->initGrid(COLUMNS, ROWS, posY[0]);
+
+	while (true)
+	{
+		drawBars();
+
+		newbird->drawBall();
+
+		Sleep(10);
+	}
+	
+	
+	//p = flappy_bird(10, birds);
+
+	/*glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(600, 600);
 	glutInitWindowPosition(350, 40);
@@ -54,11 +79,11 @@ int main(int argc, char **argv)
 	glutTimerFunc(0, timer_callback, 0);
 	glutSpecialFunc(keyboard_callback);
 	init();
-	glutMainLoop();
+	glutMainLoop();*/
 
 	cout << "its finish!" << endl;
-	//if (p)
-	//	delete p;
+	if (p)
+		delete p;
 	
 	return 0;
 }
@@ -69,19 +94,21 @@ void display_callback()
 	//    drawGrid();
 	drawBars();
 
+	//for(auto &i : birds)
+	//	i->drawBall();
 	newbird->drawBall();
 
 	glutSwapBuffers();
 
-	if (newbird->gameOver)
+	/*if (birds[0]->gameOver)
 	{
 		char _score[10];
-		itoa(newbird->score, _score, 10);
+		itoa(birds[0]->score, _score, 10);
 		char text[50] = "Your Score: ";
 		strcat(text, _score);
 		MessageBox(NULL, text, "Game Over", 0);
 		exit(0);
-	}
+	}*/
 
 }
 
@@ -102,12 +129,12 @@ void timer_callback(int)
 
 void keyboard_callback(int key, int, int)
 {
-	if (key == GLUT_KEY_UP)
+	/*if (key == GLUT_KEY_UP)
 	{
-		newbird->posY++;
+		birds[0]->posY++;
 	}
 	else if (key == GLUT_KEY_DOWN)
 	{
-		newbird->posY--;
-	}
+		birds[0]->posY--;
+	}*/
 }
