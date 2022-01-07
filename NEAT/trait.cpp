@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable:4996)
 #include <iostream>
 #include <sstream>
 #include "trait.h"
@@ -47,6 +48,28 @@ NEAT::Trait::Trait(Trait * t1, Trait * t2)
 	for (int count = 0; count < NEAT::num_trait_params; count++)
 		params[count] = (((t1->params)[count]) + ((t2->params)[count])) / 2.0;
 	trait_id = t1->trait_id;
+}
+
+void NEAT::Trait::print_to_file(std::ostream & outFile)
+{
+	char tempbuf[128];
+	sprintf(tempbuf, "trait %d ", trait_id);
+	outFile << tempbuf;
+
+	for (int count = 0; count < NEAT::num_trait_params; count++) {
+		char tempbuf2[128];
+		sprintf(tempbuf2, "%f ", params[count]);
+		outFile << tempbuf2;
+	}
+}
+
+void NEAT::Trait::print_to_file(std::ofstream & outFile)
+{
+	outFile << "trait " << trait_id << " ";
+	for (int count = 0; count < NEAT::num_trait_params; count++)
+		outFile << params[count] << " ";
+
+	outFile << std::endl;
 }
 
 void NEAT::Trait::mutate()

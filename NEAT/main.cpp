@@ -57,19 +57,19 @@ int main(int argc, char **argv)
 	replace(posY.begin(), posY.end(), 0, 30);
 	newbird->initGrid(COLUMNS, ROWS, posY[0]);
 
-	while (true)
+	/*while (true)
 	{
 		drawBars();
 
 		newbird->drawBall();
 
-		Sleep(10);
-	}
+		Sleep(1);
+	}*/
 	
 	
 	//p = flappy_bird(10, birds);
 
-	/*glutInit(&argc, argv);
+	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(600, 600);
 	glutInitWindowPosition(350, 40);
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 	glutTimerFunc(0, timer_callback, 0);
 	glutSpecialFunc(keyboard_callback);
 	init();
-	glutMainLoop();*/
+	glutMainLoop();
 
 	cout << "its finish!" << endl;
 	if (p)

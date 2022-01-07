@@ -838,7 +838,7 @@ void Genome::print_to_file(std::ofstream &outFile) {
 	//Output the traits
 	for (curtrait = traits.begin(); curtrait != traits.end(); ++curtrait) {
 		(*curtrait)->trait_id = curtrait - traits.begin() + 1;
-		//(*curtrait)->print_to_file(outFile);
+		(*curtrait)->print_to_file(outFile);
 	}
 
 	//Output the nodes

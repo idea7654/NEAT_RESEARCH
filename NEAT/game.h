@@ -12,6 +12,7 @@
 #include <vector>
 #include <cmath>
 #include <mutex>
+#include "RandWell.h"
 
 using namespace std;
 
@@ -28,19 +29,21 @@ static void Initialize_Game()
 	flag = 0;
 	prev_num = -1;
 	vector<int> a = { 55, 70, 85, 100, 115, 130, 145, 160, 175, 190 };
-	vector<int> b = { 24,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+	vector<int> b = { 12 + randbtn(12, 38),-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 	posBarX = a;
 	posBarY = b;
 	change = true;
 }
 
-static void random(int &num)
+static int random(int &prev_num)
 {
-	int _max = 60 - 12;
-	int _min = 1;
-	num = _min + rand() % (_max - _min);
+	int _max = 50 - 12;
+	int _min = 12;
+	int num = _min + randbtn(_min, _max);
+	while(abs(prev_num - num) < 10)
+		num = _min + randbtn(_min, _max);
 	//std::cout<<num<<std::endl;
-	if (num == prev_num + 3)
+	/*if (num == prev_num + 3)
 	{
 		if (num > 6)
 		{
@@ -62,7 +65,9 @@ static void random(int &num)
 			num -= 7;
 		}
 	}
+	prev_num = num;*/
 	prev_num = num;
+	return num;
 }
 
 static void drawBars()
@@ -72,23 +77,23 @@ static void drawBars()
 	{
 		for (int i = 1; i < NOB; i++)
 		{
-			int num;
-			random(num);
+			int num = 0;
+			num = random(prev_num);
 			posBarY[i] = num;
 		}
 		change = false;
 		flag = 1;
 	}
-	//glColor3f(1.0, 0.0, 0.0);
+	glColor3f(1.0, 0.0, 0.0);
 	for (int i = 0; i < NOB; i++)
 	{
 		for (int j = 0; j < posBarY[i]; j++)
 		{
-			//glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
+			glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
 		}
 		for (int j = posBarY[i] + 12; j < 60; j++)
 		{
-			//glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
+			glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
 		}
 	}
 	for (int i = 0; i < NOB; i++)
@@ -108,7 +113,7 @@ static void drawBars()
 	if (change == true)
 	{
 		int num;
-		random(num);
+		num = random(prev_num);
 		if (num > 10)
 			posBarY[NOB - 1] = num;
 		else
@@ -159,8 +164,8 @@ public:
 		}
 		else
 		{
-			float bottom = posBarX[0] - posX;
-			float height = posBarY[1] + 12 - posY;
+			float bottom = posBarX[1] - posX;
+			float height = posBarY[0] + 12 - posY;
 			float angle = atan2(height, bottom);
 			angle_up = angle;
 
@@ -174,8 +179,8 @@ public:
 	{
 		//if (!this->gameOver)
 		{
-			//glColor3f(0.0, 1.0, 0.0);
-			//glRectf(this->posX, this->posY, this->posX + 1, this->posY + 1);
+			glColor3f(0.0, 1.0, 0.0);
+			glRectf(this->posX, this->posY, this->posX + 1, this->posY + 1);
 			mtx.lock();
 			CalculateAngle();
 			mtx.unlock();
@@ -198,19 +203,11 @@ public:
 			{
 				score++;
 			}
+			else if (!isProcess && posX <= posBarX[0] - 5)
+			{
+				isProcess = true;
+			}
 		}
-		
-		//else if (!isProcess && posX <= posBarX[0] - 5)
-		//{
-		//	isProcess = true;
-		//}
-
-		//if (isProcess)
-		//{
-		//	isProcess = false;
-		//	//measure_fitness_flappybird();
-		//	//½Å°æ¸Á ½ÇÇà!
-		//}
 	}
 };
 
