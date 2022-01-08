@@ -92,7 +92,7 @@ void display_callback()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	//    drawGrid();
-	drawBars();
+	newbird->drawBars();
 
 	//for(auto &i : birds)
 	//	i->drawBall();

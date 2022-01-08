@@ -11,118 +11,105 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <mutex>
+#include <atomic>
 #include "RandWell.h"
 
 using namespace std;
 
-static int flag = 0;
-static int prev_num = -1;
-static vector<int> posBarX = { 55, 70, 85, 100, 115, 130, 145, 160, 175, 190 };
-static vector<int> posBarY = { 24,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-//static int posBarX[NOB] = { 55,70,85,100,115,130,145,160,175,190 };
-//static int posBarY[NOB] = { 24,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-static bool change = true;
-
-static void Initialize_Game()
+class Game
 {
-	flag = 0;
-	prev_num = -1;
-	vector<int> a = { 55, 70, 85, 100, 115, 130, 145, 160, 175, 190 };
-	vector<int> b = { 12 + randbtn(12, 38),-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-	posBarX = a;
-	posBarY = b;
-	change = true;
-}
+public:
+	int flag = 0;
+	int prev_num = -1;
+	vector<int> posBarX = { 55, 70, 85, 100, 115, 130, 145, 160, 175, 190 };
+	vector<int> posBarY = { 24,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+	//static int posBarX[NOB] = { 55,70,85,100,115,130,145,160,175,190 };
+	//static int posBarY[NOB] = { 24,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+	bool change = true;
 
-static int random(int &prev_num)
-{
-	int _max = 50 - 12;
-	int _min = 12;
-	int num = _min + randbtn(_min, _max);
-	while(abs(prev_num - num) < 10)
-		num = _min + randbtn(_min, _max);
-	//std::cout<<num<<std::endl;
-	/*if (num == prev_num + 3)
+	void Initialize_Game()
 	{
-		if (num > 6)
-		{
-			num += 6;
-		}
-		else
-		{
-			num -= 5;
-		}
-	}
-	else if (num == prev_num + 4)
-	{
-		if (num > 8)
-		{
-			num += 8;
-		}
-		else
-		{
-			num -= 7;
-		}
-	}
-	prev_num = num;*/
-	prev_num = num;
-	return num;
-}
-
-static void drawBars()
-{
-	srand(time(NULL));
-	if (flag == 0)
-	{
-		for (int i = 1; i < NOB; i++)
-		{
-			int num = 0;
-			num = random(prev_num);
-			posBarY[i] = num;
-		}
-		change = false;
-		flag = 1;
-	}
-	glColor3f(1.0, 0.0, 0.0);
-	for (int i = 0; i < NOB; i++)
-	{
-		for (int j = 0; j < posBarY[i]; j++)
-		{
-			glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
-		}
-		for (int j = posBarY[i] + 12; j < 60; j++)
-		{
-			glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
-		}
-	}
-	for (int i = 0; i < NOB; i++)
-	{
-		posBarX[i]--;
-	}
-	if (posBarX[0] == 0)
-	{
-		for (int i = 0; i < NOB - 1; i++)
-		{
-			posBarX[i] = posBarX[i + 1];
-			posBarY[i] = posBarY[i + 1];
-		}
-		posBarX[NOB - 1] = posBarX[NOB - 2] + 15;
+		flag = 0;
+		prev_num = -1;
+		vector<int> a = { 55, 70, 85, 100, 115, 130, 145, 160, 175, 190 };
+		vector<int> b = { 24,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+		posBarX = { 55, 70, 85, 100, 115, 130, 145, 160, 175, 190 };;
+		posBarY = { 24,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 		change = true;
 	}
-	if (change == true)
-	{
-		int num;
-		num = random(prev_num);
-		if (num > 10)
-			posBarY[NOB - 1] = num;
-		else
-			posBarY[NOB - 1] = num + 12;
-		change = false;
-	}
-}
 
-class Bird
+	int GetPos0()
+	{
+		cout << posBarY[0] << endl;
+		return posBarY[0];
+	}
+
+	int random(int &prev_num)
+	{
+		int _max = 50 - 12;
+		int _min = 12;
+		int num = _min + randbtn(_min, _max);
+		while (abs(prev_num - num) < 10)
+			num = _min + randbtn(_min, _max);
+		prev_num = num;
+		return num;
+	}
+public:
+	void drawBars()
+	{
+		srand(time(NULL));
+		if (flag == 0)
+		{
+			for (int i = 1; i < NOB; i++)
+			{
+				int num = 0;
+				num = random(prev_num);
+				posBarY[i] = num;
+			}
+			change = false;
+			flag = 1;
+		}
+		glColor3f(1.0, 0.0, 0.0);
+		for (int i = 0; i < NOB; i++)
+		{
+			for (int j = 0; j < posBarY[i]; j++)
+			{
+				glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
+			}
+			for (int j = posBarY[i] + 12; j < 60; j++)
+			{
+				glRectd(posBarX[i], j, posBarX[i] + 1, j + 1);
+			}
+		}
+		for (int i = 0; i < NOB; i++)
+		{
+			posBarX[i]--;
+		}
+		if (posBarX[0] == 0)
+		{
+			for (int i = 0; i < NOB - 1; i++)
+			{
+				posBarX[i] = posBarX[i + 1];
+				posBarY[i] = posBarY[i + 1];
+			}
+			posBarX[NOB - 1] = posBarX[NOB - 2] + 15;
+			change = true;
+		}
+		if (change == true)
+		{
+			int num;
+			num = random(prev_num);
+			if (num > 10)
+				posBarY[NOB - 1] = num;
+			else
+				posBarY[NOB - 1] = num + 12;
+			change = false;
+		}
+
+	}
+};
+
+class Bird : public Game
 {
 private:
 	int gridX;
@@ -137,7 +124,6 @@ public:
 	float angle_up = 0.0f;
 	float angle_down = 0.0f;
 	bool isStart = true;
-	mutex mtx;
 	//int posX = 12, posY = 30;
 
 	Bird() { }
@@ -181,9 +167,9 @@ public:
 		{
 			glColor3f(0.0, 1.0, 0.0);
 			glRectf(this->posX, this->posY, this->posX + 1, this->posY + 1);
-			mtx.lock();
-			CalculateAngle();
-			mtx.unlock();
+			//mtx.lock();
+			//CalculateAngle();
+			//mtx.unlock();
 			if (posY < 0 || posY == gridX - 1 || posY > 80)
 			{
 				gameOver = true;
@@ -191,8 +177,8 @@ public:
 			}
 			if (posX == posBarX[0] && (posY <= posBarY[0] || posY >= posBarY[0] + 12))
 			{
-				gameOver = true;
 				Initialize_Game();
+				gameOver = true;
 			}
 			else if (posX == posBarX[0] && isStart)
 			{

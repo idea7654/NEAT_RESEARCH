@@ -2,6 +2,7 @@
 #pragma warning(disable : 4996)
 #include "experiments.h"
 #include "RandWell.h"
+#include "game.h"
 #include <thread>
 #include <mutex>
 
@@ -505,35 +506,35 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 	float fitness = 0;
 
 	int before_pos = newBird->posY;
-	int maxCheck = 30;
-	int checkTime = 0;
+	while (newBird->gameOver)
+	{
 
-	while (!newBird->gameOver && newBird->posY > 0 && newBird->posY < 80)
+	}
+
+	while (!newBird->gameOver && newBird->posY > 0 && newBird->posY < 80 && (fitness) / 100 * (newBird->score + 0.5) * (newBird->score + 0.5) + (newBird->score * 50) <= 1000001)
 	{
 		newBird->CalculateAngle();
-		in[0] = 20.0;
+		in[0] = 5.0;
 		//in[1] = birds[net->net_id - 1]->posY; //Y벡터
 		//in[2] = birds[net->net_id - 1]->angle_up; //위와의 각도
 		//in[3] = birds[net->net_id - 1]->angle_down; //아래와의 각도
 		in[1] = newBird->posY;
 		in[2] = newBird->angle_up;
 		in[3] = newBird->angle_down;
+		//in[2] = posBarY[0] + 12 - newBird->posY;
+		//in[3] = newBird->posY - posBarY[0];
 
 		net->load_sensors(in);
 
 		bool closeisUp = false;
 		bool isIn = false;
-		if (newBird->posY < posBarY[0])
+		if (newBird->posY < newBird->posBarY[0])
 			closeisUp = false;
-		else if (newBird->posY > posBarY[0] + 12)
+		else if (newBird->posY > newBird->posBarY[0] + 12)
 			closeisUp = true;
 		else
 		{
 			isIn = true;
-			/*if (posBarY[0] + 12 - newBird->posY >= 6)
-				closeisUp = true;
-			else
-				closeisUp = false;*/
 		}
 		int previousValue = newBird->posY;
 
@@ -558,23 +559,19 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 		if (out_Up > out_Down)
 		{
 			newBird->posY++;
+			//if (isIn && maxCheck > 10000)
+			//	fitness += 0.1;
 			//steps++;
 		}
 		else if (out_Up < out_Down)
 		{
 			newBird->posY--;
+			//if (isIn && maxCheck > 10000)
+			//	fitness += 0.1;
 			//steps++;
 		}
 		else
 			newBird->posY = newBird->posY;
-
-		checkTime++;
-		if (checkTime == maxCheck)
-		{
-			checkTime = 0;
-			steps += abs(newBird->posY - before_pos) / 10;
-			before_pos = newBird->posY;
-		}
 		
 		newBird->CalculateAngle();
 		//const int upAngle = (int)(newBird->angle_up * 18 / 3.14159265358);
@@ -586,16 +583,25 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 		//	newBird->isProcess = false;
 		//}
 		if (isIn)
-			fitness += 0.1;
+		{
+
+		}
+			//fitness += 0.1;
 		else
 		{
 			if (closeisUp)
 			{
 				if (newBird->posY < previousValue)
 					fitness += 0.1;
-				else
-					if (newBird->posY > previousValue)
-						fitness += 0.1;
+				//else
+				//	fitness -= 0.1;
+			}
+			else
+			{
+				if (newBird->posY > previousValue)
+					fitness += 0.1;
+				//else
+				//	fitness -= 0.1;
 			}
 		}
 		isIn = false;
@@ -609,9 +615,11 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 	//통과할 때마다 100점
 	//움직일때마다 0.1점
 	//맞게 움직일때마다 0.2점?
-	if (steps == 0)
+	//if (steps == 0)
+	//	return 0;
+	if (fitness == 0)
 		return 0;
-	return (fitness) / 1000;
+	return (fitness) / 100 * (newBird->score + 0.5) * (newBird->score + 0.5) + (newBird->score * 50);
 }
 
 //Population *flappy_bird(int gens)
