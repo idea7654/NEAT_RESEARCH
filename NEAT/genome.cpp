@@ -615,7 +615,6 @@ Genome::~Genome() {
 	for (curgene = genes.begin(); curgene != genes.end(); ++curgene) {
 		delete (*curgene);
 	}
-
 }
 
 Network *Genome::genesis(int id) {

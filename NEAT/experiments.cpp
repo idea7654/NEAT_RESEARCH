@@ -404,6 +404,16 @@ int measure_fitness_flappybird(Population * pop, int generation, char * filename
 		newBird->posY = 30;
 		newBird->gameOver = false;
 		newBird->score = 0;
+		
+		if (!maxOrganism)
+		{
+			maxOrganism = i;
+		}
+		else {
+			//if (i->fitness > maxOrganism->fitness)
+				maxOrganism = i;
+		}
+
 		if (flappybird_evaluate(i))
 			win = true;
 		//thread_pool.emplace_back(thread(&flappybird_evaluate, i));
@@ -476,7 +486,7 @@ bool flappybird_evaluate(Organism * org)
 	if (net->net_id > 0)
 	{
 		org->fitness = try_flappybird(net, MAX_STEPS, thresh);
-		cout << org->fitness << endl;
+		//cout << org->fitness << endl;
 	}
 	else
 		return false;
@@ -621,6 +631,13 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 		return 0;
 	return (fitness) / 100 * (newBird->score + 0.5) * (newBird->score + 0.5) + (newBird->score * 50);
 }
+
+extern void GetMaxOrg(Organism *& org)
+{
+	if(maxOrganism)
+		org = maxOrganism;
+}
+
 
 //Population *flappy_bird(int gens)
 //{

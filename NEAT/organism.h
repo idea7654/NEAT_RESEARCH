@@ -48,6 +48,13 @@ namespace NEAT {
 		bool print_to_file(char *filename);
 		bool write_to_file(std::ostream &outFile);
 
+		std::mutex m;
+		std::mutex &GetMutex()
+		{
+			return m;
+		};
+
+		Organism(){}
 		Organism(double fit, Genome *g, int gen, const char* md = 0);
 		Organism(const Organism& org);	// Copy Constructor
 		~Organism();

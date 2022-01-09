@@ -23,6 +23,7 @@ using namespace NEAT;
 
 static vector<Bird*> birds;
 static Bird *newBird;
+static Organism *maxOrganism;
 
 Population *pole1_test(int gens);
 bool pole1_evaluate(Organism *org);
@@ -35,3 +36,4 @@ Population *flappy_bird(int gens, Bird *bird);
 int measure_fitness_flappybird(Population *pop, int generation, char *filename);
 bool flappybird_evaluate(Organism *org);
 int try_flappybird(Network *net, int max_steps, int thresh); //Run input
+void GetMaxOrg(Organism* &org);

@@ -66,8 +66,10 @@ Organism::Organism(const Organism& org)
 }
 
 Organism::~Organism() {
+	m.lock();
 	delete net;
 	delete gnome;
+	m.unlock();
 }
 
 void Organism::update_phenotype() {
