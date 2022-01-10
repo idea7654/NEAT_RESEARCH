@@ -524,7 +524,7 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 	while (!newBird->gameOver && newBird->posY > 0 && newBird->posY < 80 && (fitness) / 100 * (newBird->score + 0.5) * (newBird->score + 0.5) + (newBird->score * 50) <= 1000001)
 	{
 		newBird->CalculateAngle();
-		in[0] = 5.0;
+		in[0] = 1.0;
 		//in[1] = birds[net->net_id - 1]->posY; //Y벡터
 		//in[2] = birds[net->net_id - 1]->angle_up; //위와의 각도
 		//in[3] = birds[net->net_id - 1]->angle_down; //아래와의 각도
@@ -548,7 +548,8 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 		}
 		int previousValue = newBird->posY;
 
-		if (!(net->activate())) return 1;
+		if (!(net->activate())) 
+			return 1;
 
 		/*-- decide which way to push via which output unit is greater --*/
 		out_iter = net->outputs.begin();
@@ -596,7 +597,6 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 		{
 
 		}
-			//fitness += 0.1;
 		else
 		{
 			if (closeisUp)
@@ -629,98 +629,11 @@ int try_flappybird(Network * net, int max_steps, int thresh)
 	//	return 0;
 	if (fitness == 0)
 		return 0;
-	return (fitness) / 100 * (newBird->score + 0.5) * (newBird->score + 0.5) + (newBird->score * 50);
+	return (fitness) / 100 * (newBird->score + 0.5) * (newBird->score + 0.5) + (newBird->score * 40);
 }
 
 extern void GetMaxOrg(Organism *& org)
 {
-	if(maxOrganism)
+	if (maxOrganism)
 		org = maxOrganism;
 }
-
-
-//Population *flappy_bird(int gens)
-//{
-//	Population *pop = 0;
-//	Genome *start_genome;
-//	char curword[20];
-//	int id;
-//
-//	ostringstream *fnamebuf;
-//	int gen;
-//
-//	int expcount;
-//	int status;
-//	int runs[1];
-//	int totalevals;
-//	int samples;  //For averaging
-//
-//	memset(runs, 0, NEAT::num_runs * sizeof(int));
-//
-//	ifstream iFile("pole1startgenes", ios::in);
-//
-//	cout << "START SINGLE POLE BALANCING EVOLUTION" << endl;
-//
-//	cout << "Reading in the start genome" << endl;
-//	//Read in the start Genome
-//	iFile >> curword;
-//	iFile >> id;
-//	cout << "Reading in Genome id " << id << endl;
-//	start_genome = new Genome(id, iFile);
-//	iFile.close();
-//
-//	//Run multiple experiments
-//	for (expcount = 0; expcount < NEAT::num_runs; expcount++) {
-//
-//		cout << "EXPERIMENT #" << expcount << endl;
-//
-//		cout << "Start Genome: " << start_genome << endl;
-//
-//		//Spawn the Population
-//		cout << "Spawning Population off Genome" << endl;
-//
-//		pop = new Population(start_genome, NEAT::pop_size);
-//
-//		cout << "Verifying Spawned Pop" << endl;
-//		pop->verify();
-//
-//		for (gen = 1; gen <= gens; gen++) {
-//			cout << "Generation " << gen << endl;
-//
-//			fnamebuf = new ostringstream();
-//			(*fnamebuf) << "gen_" << gen << ends;  //needs end marker
-//
-//			char temp[50];
-//			sprintf(temp, "gen_%d", gen);
-//
-//			//status = pole1_epoch(pop, gen, temp);
-//			//status=(pole1_epoch(pop,gen,fnamebuf->str()));
-//			//status = flappy_epoch(pop, gen, temp);
-//
-//			if (status) {
-//				runs[expcount] = status;
-//				gen = gens + 1;
-//			}
-//			fnamebuf->clear();
-//			delete fnamebuf;
-//		}
-//
-//		if (expcount < NEAT::num_runs - 1) delete pop;
-//	}
-//
-//	totalevals = 0;
-//	samples = 0;
-//	for (expcount = 0; expcount < NEAT::num_runs; expcount++) {
-//		//cout << runs[expcount] << endl;
-//		if (runs[expcount] > 0)
-//		{
-//			totalevals += runs[expcount];
-//			samples++;
-//		}
-//	}
-//
-//	cout << "Failures: " << (NEAT::num_runs - samples) << " out of " << NEAT::num_runs << " runs" << endl;
-//	cout << "Average evals: " << (samples > 0 ? (double)totalevals / samples : 0) << endl;
-//
-//	return pop;
-//}

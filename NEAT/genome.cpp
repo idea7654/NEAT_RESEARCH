@@ -321,7 +321,7 @@ Genome::Genome(int new_id, int i, int o, int n, int nmax, bool r, double linkpro
 					out_node = (*node_iter);
 
 					//Create the gene
-					new_weight = isEven()*randbtn(0.0, 1.0);
+					new_weight = isEven()*randbtn(0, 100000);
 					newgene = new Gene(newtrait, new_weight, in_node, out_node, false, count, new_weight);
 
 					//Add the gene to the genome
@@ -345,7 +345,7 @@ Genome::Genome(int new_id, int i, int o, int n, int nmax, bool r, double linkpro
 					out_node = (*node_iter);
 
 					//Create the gene
-					new_weight = isEven()*randbtn(0.0, 1.0);
+					new_weight = isEven()*randbtn(0, 100000);
 					newgene = new Gene(newtrait, new_weight, in_node, out_node, true, count, new_weight);
 
 					//Add the gene to the genome
@@ -1166,7 +1166,7 @@ void Genome::mutate_link_weights(double power, double rate, mutator mut_type) {
 	//Go through all the Genes and perturb their link's weights
 	num = 0.0;
 	gene_total = (double)genes.size();
-	endpart = gene_total * 0.8;
+	endpart = gene_total * 0.8; //여기 바꾸기
 	//powermod=randposneg()*power*randfloat();  //Make power of mutation random
 	//powermod=randfloat();
 	powermod = 1.0;
@@ -1253,7 +1253,7 @@ void Genome::mutate_link_weights(double power, double rate, mutator mut_type) {
 			//randnum=gaussrand()*powermod;
 			//randnum=gaussrand();
 
-			randnum = isEven()*randbtn(0.0, 1.0)*power*powermod;
+			randnum = isEven()*randbtn(0, 100000)*power*powermod;
 			//std::cout << "RANDOM: " << randnum << " " << randposneg() << " " << randfloat() << " " << power << " " << powermod << std::endl;
 			if (mut_type == GAUSSIAN) {
 				randchoice = randbtn(0.0, 1.0);
@@ -1266,8 +1266,8 @@ void Genome::mutate_link_weights(double power, double rate, mutator mut_type) {
 				((*curgene)->lnk)->weight = randnum;
 
 			//Cap the weights at 8.0 (experimental)
-			if (((*curgene)->lnk)->weight > 8.0) ((*curgene)->lnk)->weight = 8.0;
-			else if (((*curgene)->lnk)->weight < -8.0) ((*curgene)->lnk)->weight = -8.0;
+			if (((*curgene)->lnk)->weight > 800000) ((*curgene)->lnk)->weight = 800000;
+			else if (((*curgene)->lnk)->weight < -800000) ((*curgene)->lnk)->weight = -800000;
 
 			//Record the innovation
 			//(*curgene)->mutation_num+=randnum;
@@ -1772,7 +1772,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs, double &curinnov,
 				//Choose the new weight
 				//newweight=(gaussrand())/1.5;  //Could use a gaussian
 				//newweight = randposneg()*randfloat()*1.0; //used to be 10.0
-				newweight = isEven() * randbtn(0.0, 1.0) * 1.0;
+				newweight = isEven() * randbtn(0, 100000) * 1.0;
 
 				//Create the new gene
 				newgene = new Gene(((thetrait[traitnum])), newweight, nodep1, nodep2, recurflag, curinnov, newweight);
@@ -1911,7 +1911,7 @@ void Genome::mutate_add_sensor(std::vector<Innovation*> &innovs, double &curinno
 					//Choose the new weight
 					//newweight=(gaussrand())/1.5;  //Could use a gaussian
 					//newweight = randposneg()*randfloat()*3.0; //used to be 10.0
-					newweight = isEven() * randbtn(0.0, 1.0) * 3.0;
+					newweight = isEven() * randbtn(0, 100000) * 3.0;
 
 					//Create the new gene
 					newgene = new Gene(((thetrait[traitnum])),
@@ -2421,7 +2421,7 @@ Genome *Genome::mate_multipoint_avg(Genome *g, int genomeid, double fitness1, do
 				else (avgene->lnk)->linktrait = ((*p2gene)->lnk)->linktrait;
 
 				//WEIGHTS AVERAGED HERE
-				(avgene->lnk)->weight = (((*p1gene)->lnk)->weight + ((*p2gene)->lnk)->weight) / 2.0;
+				(avgene->lnk)->weight = (int)((((*p1gene)->lnk)->weight + ((*p2gene)->lnk)->weight) / 2);
 
 
 
@@ -2458,7 +2458,7 @@ Genome *Genome::mate_multipoint_avg(Genome *g, int genomeid, double fitness1, do
 				else (avgene->lnk)->is_recurrent = ((*p2gene)->lnk)->is_recurrent;
 
 				avgene->innovation_num = (*p1gene)->innovation_num;
-				avgene->mutation_num = ((*p1gene)->mutation_num + (*p2gene)->mutation_num) / 2.0;
+				avgene->mutation_num = (int)(((*p1gene)->mutation_num + (*p2gene)->mutation_num) / 2);
 
 				if ((((*p1gene)->enable) == false) ||
 					(((*p2gene)->enable) == false))
@@ -2746,7 +2746,7 @@ Genome *Genome::mate_singlepoint(Genome *g, int genomeid) {
 					else (avgene->lnk)->linktrait = ((*p2gene)->lnk)->linktrait;
 
 					//WEIGHTS AVERAGED HERE
-					(avgene->lnk)->weight = (((*p1gene)->lnk)->weight + ((*p2gene)->lnk)->weight) / 2.0;
+					(avgene->lnk)->weight = (int)((((*p1gene)->lnk)->weight + ((*p2gene)->lnk)->weight) / 2);
 
 
 					if (randbtn(0.0, 1.0) > 0.5) (avgene->lnk)->in_node = ((*p1gene)->lnk)->in_node;
@@ -2759,7 +2759,7 @@ Genome *Genome::mate_singlepoint(Genome *g, int genomeid) {
 					else (avgene->lnk)->is_recurrent = ((*p2gene)->lnk)->is_recurrent;
 
 					avgene->innovation_num = (*p1gene)->innovation_num;
-					avgene->mutation_num = ((*p1gene)->mutation_num + (*p2gene)->mutation_num) / 2.0;
+					avgene->mutation_num = (int)(((*p1gene)->mutation_num + (*p2gene)->mutation_num) / 2);
 
 					if ((((*p1gene)->enable) == false) ||
 						(((*p2gene)->enable) == false))
@@ -3016,7 +3016,7 @@ double Genome::compatibility(Genome *g) {
 
 	return (NEAT::disjoint_coeff*(num_disjoint / 1.0) + 
 		NEAT::excess_coeff*(num_excess / 1.0) +
-		NEAT::mutdiff_coeff*(mut_diff_total / num_matching));
+		NEAT::mutdiff_coeff*(mut_diff_total / num_matching / 100000));
 }
 
 double Genome::trait_compare(Trait *t1, Trait *t2) {

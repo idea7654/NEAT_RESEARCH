@@ -80,10 +80,10 @@ int main(int argc, char **argv)
 	glutReshapeFunc(reshape_callback);
 	glutTimerFunc(0, timer_callback, 0);
 	
-	glutCreateWindow("Best Phenotype");
-	glutDisplayFunc(display_phenotype);
-	glutReshapeFunc(reshape_callback);
-	glutTimerFunc(0, timer_callback, 0);
+	//glutCreateWindow("Best Phenotype");
+	//glutDisplayFunc(display_phenotype);
+	//glutReshapeFunc(reshape_callback);
+	//glutTimerFunc(0, timer_callback, 0);
 	//glutReshapeFunc(reshape_callback);
 	//glutTimerFunc(0, timer_callback, 0);
 

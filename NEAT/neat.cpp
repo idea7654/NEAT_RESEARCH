@@ -6,7 +6,7 @@ double NEAT::trait_param_mut_prob = 0.5;
 double NEAT::trait_mutation_power = 1.0; // Power of mutation on a signle trait param 
 double NEAT::linktrait_mut_sig = 1.0; // Amount that mutation_num changes for a trait change inside a link
 double NEAT::nodetrait_mut_sig = 0.5; // Amount a mutation_num changes on a link connecting a node that changed its trait 
-double NEAT::weight_mut_power = 2.5; // The power of a linkweight mutation 
+double NEAT::weight_mut_power = 3; // The power of a linkweight mutation 
 double NEAT::recur_prob = 0.2; // Prob. that a link mutation which doesn't have to be recurrent will be made recurrent 
 double NEAT::disjoint_coeff = 1.0;
 double NEAT::excess_coeff = 1.0;
@@ -32,7 +32,7 @@ double NEAT::recur_only_prob = 0.2;  // Probability of forcing selection of ONLY
 int NEAT::pop_size = 100;  // Size of population 
 int NEAT::dropoff_age = 1000;  // Age where Species starts to be penalized 
 int NEAT::newlink_tries = 20;  // Number of tries mutate_add_link will attempt to find an open link 
-int NEAT::print_every = 20; // Tells to print population to file every n generations 
+int NEAT::print_every = 2; // Tells to print population to file every n generations 
 int NEAT::babies_stolen = 1; // The number of babies to siphen off to the champions 
 int NEAT::num_runs = 1;
 
@@ -73,7 +73,7 @@ double NEAT::hebbian(double weight, double maxweight, double active_in, double a
 
 	double topweight;
 
-	if (maxweight < 5.0) maxweight = 5.0;
+	if (maxweight < 500000) maxweight = 500000;
 
 	if (weight > maxweight) weight = maxweight;
 
@@ -86,13 +86,13 @@ double NEAT::hebbian(double weight, double maxweight, double active_in, double a
 
 
 
-	topweight = weight + 2.0;
+	topweight = weight + 200000;
 	if (topweight > maxweight) topweight = maxweight;
 
 	if (!(neg)) {
 		delta =
 			hebb_rate * (maxweight - weight)*active_in*active_out +
-			pre_rate * (topweight)*active_in*(active_out - 1.0);
+			pre_rate * (topweight)*active_in*(active_out - 100000);
 
 		return weight + delta;
 
@@ -101,9 +101,9 @@ double NEAT::hebbian(double weight, double maxweight, double active_in, double a
 		//In the inhibatory case, we strengthen the synapse when output is low and
 		//input is high
 		delta =
-			pre_rate * (maxweight - weight)*active_in*(1.0 - active_out) + //"unhebb"
+			pre_rate * (maxweight - weight)*active_in*(100000 - active_out) + //"unhebb"
 			//hebb_rate*(maxweight-weight)*(1.0-active_in)*(active_out)+
-			-hebb_rate * (topweight + 2.0)*active_in*active_out + //anti-hebbian
+			-hebb_rate * (topweight + 200000)*active_in*active_out + //anti-hebbian
 			//hebb_rate*(maxweight-weight)*active_in*active_out+
 			//pre_rate*weight*active_in*(active_out-1.0)+
 			//post_rate*weight*(active_in-1.0)*active_out;
