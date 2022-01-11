@@ -153,7 +153,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="experiments.cpp" />
-    <ClCompile Include="game.cpp" />
     <ClCompile Include="gene.cpp" />
     <ClCompile Include="genome.cpp" />
     <ClCompile Include="innovation.cpp" />

@@ -104,8 +104,5 @@
     <ClCompile Include="experiments.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="game.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
