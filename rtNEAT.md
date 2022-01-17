@@ -81,3 +81,37 @@
 **즉! original NEAT는 Organism을 한번씩 돌면서 측정->다음 population 생성**
 
 **rtNEAT는 틱마다 Population에서 worst를 지우고 새 Organism을 생성->여러 마리가 동시에 필요**
+
+
+
+## Evaluate in Nero
+
+1. To rtNEAT, Nero's sliders represent coefficients for fitness components.
+
+2. Each individual fitness component is normalized to a Z-score(the number of standard deviations from the mean) so that each fitness component is measured on the same scale.
+
+3. **Fitness** is computed as the sum of all these components multiplied by their slider levels, which can be positive or negative.(모든 컴포넌트의 합계에 슬라이더 레벨을 곱한 값으로 계산 )
+
+   - Slider - NEAT가 optimize하는 fitness function의 해당 컴포넌트에 대한 계수를 지정하는데 사용,
+   - static enemies, enemy turrets, rover, flags, and walls를 포함
+
+4. 센서 type
+
+   1. standard sensors - enemy radars, an "on target" sensor, object rangefinders, and line-of-fire sensors.
+
+5. 각 Organism(Agent)는 fitness를 측정하는데 제한된 시간을 받음 -> 시간이 만료되면 factory로 돌아가 다른 evaluation을 시작 -> 신경망은 factory로 돌아간 agent만 대체함
+
+6. Factory는 lucky 또는 unlucky를 얻을 수 없게 보장함. -> 모든 evaluation은 factory에서 일관되게 시작함
+
+7. field에서 한 번 이상의 deployment로부터 살아남은 agent의 fitness는 과거일수록 deployment를 점차 잊어버리는 diminishing average를 통해 업데이트 됨
+
+8. 실제 average는 처음 몇 번의 trials에 걸쳐 먼저 계산되고, 이후 연속 leaky average(TD(0) 강화학습 업데이트와 유사)가 유지됨
+
+9. ```cpp
+   f(t+1) = f(t) + (s(t) - f(t)) / r
+   f(t) - current fitness
+   s(t) - score from the current evaluation
+   r - controls the rate of forgetting
+   ```
+
+10. 해당 process로 older agents는 younger agents보다 더 많은 deployment를 통해 평균화되기 때문에 더 신뢰할 수 있는 fitness measure을 갖고있지만, 그들의 fitness는 뒤떨어지지않는다.
